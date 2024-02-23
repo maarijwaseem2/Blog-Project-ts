@@ -5,15 +5,18 @@ import { User } from '../entites/User';
 
 export const createBlogPost = async (req: Request, res: Response) => {
     try {
-        const userId:number = +req.params.id;
+        const userId:number = parseInt(req.params.userId,2);
+
+        if (isNaN(userId)) {
+            return res.status(400).json({ message: 'Invalid userId' });
+        }
+
         const userRepository = AppDataSource.getRepository(User);
         const user = await userRepository.findOne({where:{id:userId}});
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
         const { title, content } = req.body;
-
         const blogPostRepository = AppDataSource.getRepository(BlogPost);
         const newBlogPost = new BlogPost();
         newBlogPost.title = title;
@@ -23,7 +26,8 @@ export const createBlogPost = async (req: Request, res: Response) => {
         await blogPostRepository.save(newBlogPost);
 
         res.status(201).json({ message: 'Blog post created successfully', blogPost: newBlogPost });
-    } catch (error) {
+    } 
+    catch (error) {
         console.error('Error creating blog post:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
@@ -85,7 +89,6 @@ export const updateBlogPost = async (req: Request, res: Response) => {
 
 // Delete a blog post by ID
 export const deleteBlogPost = async (req: Request, res: Response) => {
-
     try {
         const  id:number  = parseInt(req.params.id);
         const blogPostRepository = AppDataSource.getRepository(BlogPost);

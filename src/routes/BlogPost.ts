@@ -1,5 +1,4 @@
 import {Router} from 'express';
-import { Request, Response } from 'express';
 import * as BlogController from '../controllers/BlogPostControllers';
 import checkAuth  from '../middleware/check-auth';
 

@@ -64,25 +64,24 @@ export const login = async (req: Request, res: Response) => {
     }
 };
 
-// // delete User 
-// export const delete = async (req: Request, res: Response) => {
-//     const userId = req.params.id;
+// delete User 
+export const Delete = async (req: Request, res: Response) => {
+    try {
+        // Find the user by ID
+        const userId = req.params.id;
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({where:{ id:req.body.userId}});
 
-//     try {
-//         // Find the user by ID
-//         const userRepository = AppDataSource.getRepository(User);
-//         const user = await userRepository.findOne({where:{ id:req.body.id}});
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-//         if (!user) {
-//             return res.status(404).json({ message: 'User not found' });
-//         }
+        // Delete the user
+        await userRepository.remove(user);
 
-//         // Delete the user
-//         await userRepository.remove(user);
-
-//         res.status(200).json({ message: 'User deleted' });
-//     } catch (error) {
-//         console.error('Error deleting user:', error);
-//         res.status(500).json({ error: 'Internal server error' });
-//     }
-// };
+        res.status(200).json({ message: 'User deleted' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};

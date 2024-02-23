@@ -8,6 +8,6 @@ router.post("/signup", UserController.signup);
 
 router.post("/login", UserController.login);
 
-// router.delete("/:user_id",checkAuth, UserController);
+router.delete("/:id",checkAuth, UserController.Delete);
 
 export default router;
