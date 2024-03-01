@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
 
-interface UserRequire {
+interface UserRequire extends Request {
   email: string;
   userId: string;
 }

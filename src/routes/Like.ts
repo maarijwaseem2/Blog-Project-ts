@@ -1,11 +1,11 @@
-// import express from 'express';
-// import * as BlogPostLikeController from '../controllers/BlogLikeControllers';
-// import * as CommentLikeController from '../controllers/CommentLikeControllers';
+import express from 'express';
+import * as BlogPostLikeController from '../controllers/BlogLikeControllers';
+import * as CommentLikeController from '../controllers/CommentLikeControllers';
 
-// const router = express.Router();
+const router = express.Router();
 
-// router.post('/posts/:userId/:postId/like', BlogPostLikeController.toggleLikeBlogPost);
+router.post('/posts/:userId/:postId/like', BlogPostLikeController.toggleLikeBlogPost);
 
-// router.post('/comments/:userId/:commentId/like', CommentLikeController.toggleLikeComment);
+router.post('/comments/:userId/:commentId/like', CommentLikeController.toggleLikeComment);
 
-// export default router;
+export default router;

@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { User } from './User';
 import { BlogPost } from './BlogPost';
-import { CommentLike } from './CommentLike'; // Import the CommentLike entity
+import { CommentLike } from './CommentLike'; 
 
 @Entity()
 export class Comment {
@@ -25,7 +25,7 @@ export class Comment {
     @JoinColumn({ name: 'postId' })
     post: BlogPost;
 
-    @ManyToOne(() => CommentLike, like => like.comment)
+    @OneToMany(() => CommentLike, like => like.comment)
     likes: CommentLike[];
 
     public isOwnedBy(userId: number, postId: number): boolean {
