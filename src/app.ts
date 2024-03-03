@@ -5,6 +5,8 @@ import morgan from "morgan";
 import bodyParser from "body-parser"
 import userRoutes from "./routes/User";
 import BlogPostRoutes from "./routes/BlogPost";
+import CommentRoutes from "./routes/Comment";
+import LikeRoutes from "./routes/Like";
 require("dotenv").config();
 const app = express();
 
@@ -30,9 +32,10 @@ app.get("/",(req:Request, res:Response)=>{
     res.send("Server is connecting");
 })
 
-
 app.use("/User", userRoutes);
 app.use("/Blog", BlogPostRoutes);
+app.use("/Comment", CommentRoutes);
+app.use("/Like", LikeRoutes);
 AppDataSource.initialize()
 .then(()=>{
     console.log("Data Source has been initialized!");

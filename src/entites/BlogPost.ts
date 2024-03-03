@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinTable } from 'typeorm';
 import { User } from './User';
-// import { Comment } from './Comment';
-// import { Like } from './Like';
+import { Comment } from './Comment';
+import { BlogLike } from './BlogLike'; // Import the BlogPostLike entity
 
 @Entity()
 export class BlogPost {
@@ -15,18 +15,17 @@ export class BlogPost {
     content: string;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    publicationDate: Date;
+    createdAt: Date;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
-    @ManyToOne(() => User, (user) => user.blogPosts)
+    @ManyToOne(() => User, user => user.blogPosts)
     author: User;
 
-    // @OneToMany(() => Comment, comment => comment.blogPost)
-    // comments: Comment[];
+    @OneToMany(() => Comment, comment => comment.id)
+    comments: Comment[];
 
-    // @ManyToMany(() => Like)
-    // @JoinTable()
-    // likes: Like[];
+    @OneToMany(() => BlogLike, like => like.blogPost)
+    likes: BlogLike[]; 
 }
