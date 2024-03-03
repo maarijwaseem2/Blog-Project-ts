@@ -6,8 +6,14 @@ const router = Router();
 
 router.post("/signup", UserController.signup);
 
-router.post("/login", UserController.login);
+router.post("/login",checkAuth, UserController.login);
 
-router.delete("/:id",checkAuth, UserController.Delete);
+router.get("/getAllUser", UserController.getAllUsers);
+
+router.get("/getUserById/:id", UserController.getUserById);
+
+router.put("/updateUser/:id",checkAuth, UserController.updateUser);
+
+router.delete("/deleteUser/:id",checkAuth, UserController.deleteUser);
 
 export default router;

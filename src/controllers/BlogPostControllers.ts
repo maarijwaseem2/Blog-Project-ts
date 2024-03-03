@@ -4,6 +4,7 @@ import { BlogPost } from '../entites/BlogPost';
 import { User } from '../entites/User';
 import {AuthenticatedRequest} from './types'
 
+// Create Blog Post 
 export const createBlogPost = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const userIdString: string | undefined  = (req.userData?.userId);
@@ -11,24 +12,23 @@ export const createBlogPost = async (req: AuthenticatedRequest, res: Response) =
             return res.status(400).json({ message: 'User ID is missing in the request' });
         }
         const userId: number = parseInt(userIdString);
-        // console.log(req.params);
-        // const userId:number = parseInt(req.params.id);
-        // const userId:number = req.body.userId;
-        
-        if (!userId && userId === parseInt(req.params.id)) {
-            return res.status(400).json({ message: 'Invalid userId' });
-        }
 
         const userRepository = AppDataSource.getRepository(User);
         const user = await userRepository.findOne({where:{id:userId}});
         if (req.body.userId && req.body.userId !== userId || req.body.moderator == false ) {
             throw 'Invalid user ID';
           } 
-        // const user = await userRepository.findOne({where:{id:userId}});
         if (!user)  {
             return res.status(404).json({ message: 'User not found' });
         }
+
         const { title, content } = req.body;
+
+        // Check for empty title or content
+        if (!title || !content) {
+            return res.status(400).json({ message: 'Title and content are required' });
+        }
+
         const blogPostRepository = AppDataSource.getRepository(BlogPost);
         const newBlogPost = new BlogPost();
         newBlogPost.title = title;
@@ -76,6 +76,33 @@ export const getBlogPostById = async (req: Request, res: Response) => {
     }
 };
 
+// Get user posts and count
+export const getUserPostsAndCount = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userIdString: string | undefined = req.userData?.userId;
+        if (!userIdString) {
+            return res.status(400).json({ message: 'User ID is missing in the request' });
+        }
+        const userId: number = parseInt(userIdString);
+
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({where:{id:userId}});
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const blogPostRepository = AppDataSource.getRepository(BlogPost);
+        const userPosts = await blogPostRepository.find({ where: { author: user }, relations: ['author'] });
+        const postCount = userPosts.length;
+
+        res.status(200).json({ message: 'User posts:', postCount, userPosts });
+    } catch (error) {
+        console.error('Error fetching user posts and count:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 // Update a blog post by ID
 export const updateBlogPost = async (req: AuthenticatedRequest, res: Response) => {
     const { title, content } = req.body;
@@ -111,11 +138,6 @@ export const updateBlogPost = async (req: AuthenticatedRequest, res: Response) =
 // Delete a blog post by ID
 export const deleteBlogPost = async (req: AuthenticatedRequest, res: Response) => {
     try {
-        // const userIdString: string | undefined  = req.userData?.userId;
-        // if (!userIdString) {
-            //     return res.status(400).json({ message: 'User ID is missing in the request' });
-            // }
-            // const userId: number = parseInt(userIdString);
         const postId:number  = parseInt(req.params.id);
         const userId: number = parseInt(req.userData?.userId || "");
         console.log('Post ID:', postId);

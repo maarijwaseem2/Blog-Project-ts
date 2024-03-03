@@ -4,8 +4,8 @@ import * as CommentLikeController from '../controllers/CommentLikeControllers';
 
 const router = express.Router();
 
-router.post('/posts/:userId/:postId/like', BlogPostLikeController.toggleLikeBlogPost);
+router.post('/posts/:userId/:postId', BlogPostLikeController.toggleLikeBlogPost);
 
-router.post('/comments/:userId/:commentId/like', CommentLikeController.toggleLikeComment);
+router.post('/comments/:userId/:commentId', CommentLikeController.toggleLikeComment);
 
 export default router;

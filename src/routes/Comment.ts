@@ -17,6 +17,8 @@ router.get('/comments/:id', CommentController.getCommentById);
 router.put('/comments/:id',checkAuth, CommentController.updateComment);
 
 // Delete a comment
+router.get('/UserComment', checkAuth ,CommentController.getUserPostsAndCount);
+
 router.delete('/comments/:id', checkAuth, CommentController.deleteComment);
 
 export default router;

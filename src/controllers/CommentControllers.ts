@@ -86,6 +86,33 @@ export const getCommentById = async (req: Request, res: Response) => {
     }
 };
 
+// Get user posts and count
+export const getUserPostsAndCount = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userIdString: string | undefined = req.userData?.userId;
+        if (!userIdString) {
+            return res.status(400).json({ message: 'User ID is missing in the request' });
+        }
+        const userId: number = parseInt(userIdString);
+
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({where:{id:userId}});
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const blogPostRepository = AppDataSource.getRepository(Comment);
+        const userComment = await blogPostRepository.find({ where: { user: user }, relations: ['user'] });
+        const CommentCount = userComment.length;
+
+        res.status(200).json({ message: 'User Comment: ', CommentCount, userComment });
+    } catch (error) {
+        console.error('Error fetching user posts and count:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 // Update a comment by ID
 export const updateComment = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -95,6 +122,9 @@ export const updateComment = async (req: AuthenticatedRequest, res: Response) =>
         console.log('User ID:', userId);
 
         const { content } = req.body;
+        if (!content) {
+            return res.status(400).json({ message: 'Content are required' });
+        }
         const commentRepository = AppDataSource.getRepository(Comment);
         let comment = await commentRepository.findOne({where:{id:commentId},relations: ['user']});
 

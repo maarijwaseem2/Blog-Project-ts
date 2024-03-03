@@ -17,10 +17,16 @@ export const signup = async (req: Request, res: Response) => {
             return res.status(409).json({ message: 'User already exists' });
         }
 
-        // Hash the password
+        if (!email.toLowerCase().endsWith('@gmail.com') || email.toLowerCase().indexOf('@gmail.com') === 0) {
+            return res.status(400).json({ message: 'Please provide a valid email address' });
+        }
+
+        if (password.length < 5) {
+            return res.status(401).json({ message: 'At Least password Length 5 character' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create a new user
         const newUser = userRepository.create({
             email,
             password: hashedPassword
@@ -39,14 +45,12 @@ export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     try {
-        // Find the user by email
         const userRepository = AppDataSource.getRepository(User);
         const user = await userRepository.findOne({where:{ email:req.body.email} });
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Check if the password matches
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
             return res.status(401).json({ message: 'Invalid email or password' });
@@ -63,25 +67,82 @@ export const login = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-
-// delete User 
-export const Delete = async (req: Request, res: Response) => {
+export const getAllUsers = async (req: Request, res: Response) => {
     try {
-        // Find the user by ID
-        const userId = req.params.id;
         const userRepository = AppDataSource.getRepository(User);
-        const user = await userRepository.findOne({where:{ id:req.body.userId}});
+        const users = await userRepository.find();
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Error getting users:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
+// Get a single user by ID
+export const getUserById = async (req: Request, res: Response) => {
+    const userId: number = parseInt(req.params.id);
+    try {
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({where:{id:userId}});
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error getting user by ID:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+// Update a user
+export const updateUser = async (req: Request, res: Response) => {
+    const userId: number = parseInt(req.params.id);
+    const { email, password } = req.body;
+    if (!email.toLowerCase().endsWith('@gmail.com') || email.toLowerCase().indexOf('@gmail.com') === 0) {
+        return res.status(400).json({ message: 'Please provide a valid email address' });
+    }
+
+    if (password.length < 5) {
+        return res.status(401).json({ message: 'At Least password Length 5 character' });
+    }
+
+    try {
+        const userRepository = AppDataSource.getRepository(User);
+        let user = await userRepository.findOne({where:{id:userId}});
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Delete the user
-        await userRepository.remove(user);
+        if (email) {
+            user.email = email;
+        }
 
-        res.status(200).json({ message: 'User deleted' });
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            user.password = hashedPassword;
+        }
+
+        await userRepository.save(user);
+        res.status(200).json({ message: 'User updated successfully' });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+// Delete a user
+export const deleteUser = async (req: Request, res: Response) => {
+    const userId: number = parseInt(req.params.id);
+    try {
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({where:{id:userId}});
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        await userRepository.remove(user);
+        res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
         console.error('Error deleting user:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ message: 'Internal server error' });
     }
 };

@@ -13,6 +13,9 @@ router.get('/posts',BlogController.getAllBlogPosts);
 // Get a specific blog post by ID
 router.get('/posts/:id', BlogController.getBlogPostById);
 
+// Get a specific blog post by ID
+router.get('/UserBlogPost', checkAuth ,BlogController.getUserPostsAndCount);
+
 // Update a blog post
 router.put('/posts/:id',checkAuth, BlogController.updateBlogPost);
 
